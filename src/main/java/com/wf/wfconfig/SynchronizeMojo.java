@@ -2,29 +2,37 @@ package com.wf.wfconfig;
 
 import com.wf.wfconfig.exception.ResourceNotFoundException;
 import org.apache.commons.io.FileUtils;
+import org.apache.maven.model.Build;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.PropertyResourceBundle;
 
 
 /**
- * Created by 刘东旭 on 2019/4/3.
+ *
+ * 同步wfconfig配置文件
+ * <p>Created by 刘东旭 on 2019/4/3.</p>
+ *
+ * @requiresProject true
  */
-@Mojo(name = "synchronize",defaultPhase = LifecyclePhase.PROCESS_SOURCES)
+@Mojo(name = "refresh",defaultPhase = LifecyclePhase.PROCESS_SOURCES)
 public class SynchronizeMojo extends AbstractMojo {
 
     private final String baseConfigDir = "wfconfig";
 
-    @Parameter(property = "rootPath",required = true,defaultValue = "${basedir}")
-    private String rootPath;
+    @Parameter(defaultValue = "${project}", readonly = true )
+    private MavenProject project;
+
 
     @Parameter(property = "targetPath",required = true,defaultValue = "/opt/wf/")
     private File targetPath;
@@ -34,9 +42,9 @@ public class SynchronizeMojo extends AbstractMojo {
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
-            File folder = new File(getNameSpaceConfigFolder());
-            File configFolder = new File(rootPath+baseConfigDir+configDir+File.separator+getNameSpace());
-            FileUtils.copyDirectory(configFolder,folder);
+            File targetFolder = new File(getTargetConfigFolder());
+            File configFolder = new File(project.getBasedir().getAbsolutePath()+File.separator+baseConfigDir+File.separator+configDir+File.separator+getNameSpace());
+            FileUtils.copyDirectory(configFolder,targetFolder);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -45,8 +53,8 @@ public class SynchronizeMojo extends AbstractMojo {
 
     private String getNameSpace(){
         try {
-            ClassLoader cl = this.getClass().getClassLoader();
-            InputStream in = cl.getResourceAsStream("META-INF/namespace.properties");
+            Build build = project.getBuild();
+            InputStream in = new FileInputStream(build.getOutputDirectory()+"/META-INF/namespace.properties");
             PropertyResourceBundle prb = new PropertyResourceBundle(in);
             String namespace = prb.containsKey("namespace")?prb.getString("namespace"):"";
             if (namespace!=null  && !"".equals(namespace.trim())){
@@ -66,7 +74,7 @@ public class SynchronizeMojo extends AbstractMojo {
         }
     }
 
-    private String getNameSpaceConfigFolder() {
+    private String getTargetConfigFolder() {
         try {
             String toPathRoot = targetPath.getCanonicalPath();
             if (toPathRoot.endsWith("/") || toPathRoot.endsWith("\\")) {
