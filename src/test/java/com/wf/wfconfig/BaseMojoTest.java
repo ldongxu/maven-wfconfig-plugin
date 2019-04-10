@@ -1,8 +1,7 @@
 package com.wf.wfconfig;
 
-import org.apache.maven.DefaultMaven;
-import org.apache.maven.Maven;
-import org.apache.maven.execution.*;
+import org.apache.maven.execution.DefaultMavenExecutionRequest;
+import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.testing.MojoRule;
 import org.apache.maven.plugin.testing.resources.TestResources;
@@ -13,8 +12,6 @@ import org.apache.maven.project.ProjectBuildingRequest;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.internal.impl.SimpleLocalRepositoryManagerFactory;
-import org.eclipse.aether.repository.LocalRepository;
-import org.eclipse.aether.repository.NoLocalRepositoryManagerException;
 import org.junit.Assert;
 import org.junit.Rule;
 
