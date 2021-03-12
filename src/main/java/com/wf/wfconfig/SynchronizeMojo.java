@@ -69,7 +69,6 @@ public class SynchronizeMojo extends AbstractMojo {
             }
             return namespace;
         } catch (Exception e) {
-            e.printStackTrace();
             throw new RuntimeException("META-INF in the classpath folder to ensure that there is 'namespace.properties' configuration file, and specifies the value namespace or vm parameters contain WF.uspcluster", e);
         }
     }
